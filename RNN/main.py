@@ -21,7 +21,7 @@ def lazy_property(function):
 
 class VariableSequenceClassification:
 
-    CHECKPOINT_FILE_NAME = 'Training_Checkpoint'
+    CHECKPOINT_FILE_NAME = 'CheckPoints/Training_Checkpoint'
 
     def __init__(self, data, target, num_hidden=100, num_layers=2):
         self.data = data
@@ -93,7 +93,7 @@ class VariableSequenceClassification:
         saver.save(sess, self.CHECKPOINT_FILE_NAME)
 
     def continue_progress(self, sess):
-        if os.path.exists(os.path.join('RNN', self.CHECKPOINT_FILE_NAME)):
+        if os.path.exists(os.path.join(self.CHECKPOINT_FILE_NAME+'.index')):
             saver = tf.train.Saver()
             saver.restore(sess, self.CHECKPOINT_FILE_NAME)
 
@@ -108,11 +108,12 @@ def train_and_test():
     model = VariableSequenceClassification(data, target)
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
-    model.continue_progress(sess)
-    batch_size = 50
+
+    batch_size = 10
     for epoch in range(1000):
+        model.continue_progress(sess)
         for _ in range(int(len(train_input)/batch_size)):
             sess.run(model.optimize, {data: train_input[_*batch_size:(_+1)*batch_size], target: train_output[_*batch_size:(_+1)*batch_size]})
-            model.save_progress(sess)
+        model.save_progress(sess)
         error = sess.run(model.error, {data: test_input, target: test_output})
         print('Epoch {:2d} error {:3.1f}%'.format(epoch + 1, 100 * error))
