@@ -1,0 +1,1 @@
+from .main import train_and_test
